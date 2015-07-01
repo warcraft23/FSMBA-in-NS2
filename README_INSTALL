@@ -1,0 +1,56 @@
+Refer to: "NS by Example" (Section: Add New Appications and Agents)
+
+All path-name start from ns2 root directory
+
+/common/packet.h
+- add inside packet_t
+	PT_BROADCASTBASE, 
+  before PT_NTYPE
+
+- add inside p_info class 
+	name_[PT_BROADCASTBASE]="BroadcastMSG";
+  before_[PT_NTYPE]="undefined";
+
+/common/ns-process.h
+- add inside AppDataType 
+	BBCAST_DATA, 
+  before ADU_LAST
+
+/tcl/lib/ns-packet.tcl
+- add in the foreach prot
+	BroadcastBase 
+  at the end
+
+/trace/cmu-trace.cc
+- in the void CMUTrace::format(Packet* p, const char *why) function
+  add inside the inner case:
+	case PT_BROADCASTBASE:
+		format_msg(p, offset);
+		break;
+			
+/tcl/lib/ns-default.tcl
+- add
+	Application/BroadcastbaseApp set bmsg-interval_ 15
+	Application/BroadcastbaseApp set bsize_ 100
+
+
+/broadcast/
+- create folder and copy:
+	BroadcastbaseAgent.cc BroadcastbaseAgent.h
+	BroadcastbaseApp.cc BroadcastbaseApp.h
+	bbcast-packet.cc bbcast-packet.h
+	
+/Makefile
+- inside OBJECT_CC add file depends : 
+	broadcast/bbcast-packet.o
+	broadcast/BroadcastbaseAgent.o
+	broadcast/BroadcastbaseApp.o
+	
+Now you can run:
+	- make clean
+	- make depend
+	- make
+in the ns2 root directory
+
+start simulation:
+- ns broadcast.tcl
